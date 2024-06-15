@@ -1,39 +1,66 @@
 #include "LoadBalancer.h"
 
-LoadBalancer::LoadBalancer(const vector<Server>& serverVec, Counter& counter) {
+LoadBalancer::LoadBalancer(const vector<Server>& serverVec, Counter& counter): clockCounter(counter) {
       servers = serverVec;
-      clockCounter = counter;
 }
 
 void LoadBalancer::addRequest(const Request& request) {
     requestQueue.push(request);
 }
 
-void LoadBalancer::balanceLoad() {
-    // least connections algorithm: find server with smallest queue size
-    int minQueueSize = numeric_limits<int>::max();
+void LoadBalancer::balanceLoad(int numClockCycles) {
+    // Least connections algorithm: find server with smallest queue size
+    vector<thread> serverThreads;
+    int minQueueSize = INT_MAX;
     Server* selectedServer = nullptr;
+    ofstream logFile("log.txt", ios::app); // Open file for logging
 
-    for (auto& server : servers) {
-        if (!server.isActive()) {
-            continue; // Skip inactive servers
+    while (clockCounter.getCycles() < numClockCycles) {
+        for (auto& server : servers) {
+            cout << server.getServerID() << ": " << server.getRequestQueueSize() << endl;
+            int queueSize = server.getRequestQueueSize();
+            if (queueSize <= minQueueSize) {
+                minQueueSize = queueSize;
+                selectedServer = &server;
+            }
         }
-        int queueSize = server.getRequestQueueSize();
-        if (queueSize < minQueueSize) {
-            minQueueSize = queueSize;
-            selectedServer = &server;
+        if (selectedServer) {
+            selectedServer->addRequest(requestQueue.front());
+            logFile << "Clock cycle: " << clockCounter.getCycles() << " | new request added to " << selectedServer->getServerID() << "\n";
+            if (!selectedServer->isActive()){
+                try{
+                    serverThreads.emplace_back(&Server::processRequests, selectedServer, numClockCycles);
+                } catch (const std::exception& e) {
+                    cout << e.what() << endl;
+                }
+            }
+            requestQueue.pop();
+        }
+        clockCounter.incrementCycle();
+        cout<< clockCounter.getCycles() << endl;
+        
+        if (clockCounter.getCycles() == numClockCycles){
+            break;
         }
     }
 
-    if (selectedServer) {
-        selectedServer->addRequest(requestQueue.front());
-        selectedServer->processRequests();
-        requestQueue.pop();
-    }
+    cout << "end";
 
-    clockCounter.incrementCycle();
+    for (auto& thread : serverThreads) {
+        for (auto& server : servers) {
+            server.Stop();
+        }
+
+        if (thread.joinable()) {
+            thread.join();
+        }
+    } 
 }
 
 int LoadBalancer::getClockCycles() const {
     return clockCounter.getCycles();
+}
+
+int LoadBalancer::getRequestQueueSize() const {
+    return requestQueue.size();
 }

@@ -12,14 +12,18 @@ using namespace std;
 class Server {
 private:
     int serverID;
-    queue<Request> requestQueue;          // Queue to store incoming requests
     bool active;                          // Indicates if the server is active
+    queue<Request> requestQueue;          // Queue to store incoming requests
     Counter& clockCounter;
+    bool stop;
 
 public:
     Server(int id, Counter& counter);
+    Server(const Server& other); // Copy constructor
+    Server& operator=(const Server& other); // Copy Assignment constructor
+    void Stop();
     void addRequest(const Request& request);
-    void processRequests();
+    void processRequests(int limit);
     bool isActive() const;
     void setActive(bool isActive);
     int getServerID() const;

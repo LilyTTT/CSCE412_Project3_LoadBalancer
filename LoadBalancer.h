@@ -2,6 +2,8 @@
 #define LOADBALANCER_H
 
 #include <queue>
+#include <thread>
+#include <fstream>
 #include "Server.h"
 #include "Request.h"
 #include "Counter.h"
@@ -15,8 +17,9 @@ private:
 public:
     LoadBalancer(const std::vector<Server>& servers, Counter& counter);
     void addRequest(const Request& request);
-    void balanceLoad(); // least connections
+    void balanceLoad(int numClockCycles); // Least connections
     int getClockCycles() const;
+    int getRequestQueueSize() const;
 };
 
 #endif // LOADBALANCER_H
