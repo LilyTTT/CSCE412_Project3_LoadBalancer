@@ -1,6 +1,7 @@
 #include "Server.h"
 
-Server::Server(int id) {
+Server::Server(int id, Counter& counter) {
+    clockCounter = counter;
     serverID = id;
     active = false; // Server starts inactive
 }
@@ -15,7 +16,7 @@ void Server::addRequest(const Request& request) {
     }
 }
 
-void Server::processRequests(int totCycles) {
+void Server::processRequests() {
     ofstream logFile("log.txt", ios::app); // Open file for logging
     Request currentRequest;
     int processTime = 0;
@@ -29,13 +30,13 @@ void Server::processRequests(int totCycles) {
     }
 
     while (true) {
-        if (totCycles == 10000) {
+        if (clockCounter.getCycles() == 10000) {
             logFile << "10000 clock cycles reached, end of log";
             logFile.close();
         }
 
         if (cycles <= processTime) {
-            cycles += 1;
+            cycles++;
         }
         else if (cycles > processTime) {
             // if the last request has been processed
@@ -51,7 +52,6 @@ void Server::processRequests(int totCycles) {
                 logFile << "Server ID " << serverID << " is processing request with inAddress: " << currentRequest.getIpIn() << ", outAddress: " << currentRequest.getIpOut() << ", processTime: " << processTime << " clock cycles \n";
             }
         }
-        totCycles += 1;
     }
 
     active = false;
@@ -65,6 +65,14 @@ bool Server::isActive() const {
     return active;
 }
 
-void Server::setActive(bool isActive){
+void Server::setActive(bool isActive) {
     active = isActive;
+}
+
+int Server::getServerID() const {
+    return serverID;
+}
+
+int Server::getRequestQueueSize() {
+    return requestQueue.size();
 }

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include "Request.h"
+#include "Counter.h"
 
 using namespace std;
 
@@ -13,14 +14,16 @@ private:
     int serverID;
     queue<Request> requestQueue;          // Queue to store incoming requests
     bool active;                          // Indicates if the server is active
+    Counter& clockCounter;
 
 public:
-    Server(int id);
+    Server(int id, Counter& counter);
     void addRequest(const Request& request);
-    void processRequests(int totCycles);
+    void processRequests();
     bool isActive() const;
     void setActive(bool isActive);
     int getServerID() const;
+    int getRequestQueueSize();
 };
 
 #endif // SERVER_H
