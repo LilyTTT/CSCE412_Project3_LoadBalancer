@@ -5,7 +5,7 @@ using namespace std;
 Request::Request() {
     ipIn = generateIPAddress();
     ipOut = generateIPAddress();
-    processTime = rand() % 1000;
+    processTime = rand() % 5 + 1;  // in units of clock cycle
 }
 
 // Private method to generate random IP address

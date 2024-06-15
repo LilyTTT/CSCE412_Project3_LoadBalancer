@@ -5,18 +5,20 @@
 #include <ctime>
 #include <cstdlib>
 
+using namespace std;
+
 class Request {
 private:
-    std::string ipIn;    
-    std::string ipOut;   
+    string ipIn;    
+    string ipOut;   
     int processTime;          
 
     std::string generateIPAddress();
 
 public:
     Request();
-    std::string getIpIn() const;
-    std::string getIpOut() const;
+    string getIpIn() const;
+    string getIpOut() const;
     int getProcessTime() const;
 };
 
