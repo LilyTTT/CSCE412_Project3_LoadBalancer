@@ -15,9 +15,14 @@ void LoadBalancer::balanceLoad(int numClockCycles) {
     Server* selectedServer = nullptr;
     ofstream logFile("log.txt", ios::app); // Open file for logging
 
-    while (clockCounter.getCycles() < numClockCycles) {
+    while (clockCounter.getCycles() < numClockCycles && !requestQueue.empty()) {
+        // Ramdomly add new requests
+        if (rand() % 5 == 1){
+            Request newRequest;
+            requestQueue.push(newRequest);
+        }
+
         for (auto& server : servers) {
-            cout << server.getServerID() << ": " << server.getRequestQueueSize() << endl;
             int queueSize = server.getRequestQueueSize();
             if (queueSize <= minQueueSize) {
                 minQueueSize = queueSize;
@@ -26,7 +31,6 @@ void LoadBalancer::balanceLoad(int numClockCycles) {
         }
         if (selectedServer) {
             selectedServer->addRequest(requestQueue.front());
-            logFile << "Clock cycle: " << clockCounter.getCycles() << " | new request added to " << selectedServer->getServerID() << "\n";
             if (!selectedServer->isActive()){
                 try{
                     serverThreads.emplace_back(&Server::processRequests, selectedServer, numClockCycles);
@@ -37,14 +41,12 @@ void LoadBalancer::balanceLoad(int numClockCycles) {
             requestQueue.pop();
         }
         clockCounter.incrementCycle();
-        cout<< clockCounter.getCycles() << endl;
-        
+
         if (clockCounter.getCycles() == numClockCycles){
+            cout << "leave" << endl;
             break;
         }
     }
-
-    cout << "end";
 
     for (auto& thread : serverThreads) {
         for (auto& server : servers) {
