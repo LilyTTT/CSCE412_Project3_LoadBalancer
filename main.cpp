@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <thread>
+#include <chrono> 
 #include "LoadBalancer.h"
 #include "Server.h"
 #include "Counter.h"
@@ -30,13 +31,14 @@ int main() {
     LoadBalancer loadBalancer(servers, clockCounter);
 
     // Generate a full queue of requests (servers * 100)
-    int numRequests = numServers * 100;
+    int numRequests = numServers * 800;
     for (int i = 0; i < numRequests; ++i) {
         Request newRequest;
         loadBalancer.addRequest(newRequest);
     }
 
     logFile << "Initial queue size: " << loadBalancer.getRequestQueueSize() << "\n";
+    logFile.close();
 
     // Get time to run the load balancer from user input (in clock cycles)
     int numClockCycles;
@@ -51,8 +53,9 @@ int main() {
     //lbThread.join();
 
     // Print the total clock cycles after running the load balancer
-    logFile << "Final queue size: " << loadBalancer.getRequestQueueSize() << "\n";
-    logFile.close();
+    std::ofstream appendFile("log.txt", std::ios::app);
+    appendFile << "Final queue size: " << loadBalancer.getRequestQueueSize() << "\n\n";
+    appendFile.close();
     std::cout << "Total clock cycles: " << clockCounter.getCycles() << std::endl;
 
     return 0;
