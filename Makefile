@@ -1,35 +1,24 @@
-# Compiler options
-CXX = g++
-CXXFLAGS = -std=c++17 -Wall
+CXX=g++
+CXXFLAGS=-std=c++17 -g -pedantic -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer
+LDLIBS=
 
-# Target executable
-TARGET = output
 
-# Source files
-SRCS = *cpp
+SRCS=main.cpp
+DEPS=LoadBalancer.cpp Request.cpp Server.cpp
+BINS=$(SRCS:%.cpp=%.exe)
+OBJS=$(DEPS:%.cpp=%.o)
 
-# Object files
-OBJS = $(SRCS:.cpp=.o)
 
-# Dependency files
-DEPS = $(OBJS:.o=.d)
+all: clean $(BINS)
 
-# Default rule
-all: $(TARGET)
+%.o: %.cpp %.h
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-# Rule to link the target executable
-$(TARGET): $(OBJS)
-    $(CXX) $(CXXFLAGS) $^ -o $@
+%.exe: %.cpp $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $(patsubst %.exe,%,$@) $^ $(LDLIBS)
 
-# Rule to compile source files
-%.o: %.cpp
-    $(CXX) $(CXXFLAGS) -MMD -c $< -o $@
 
-# Include dependency files
--include $(DEPS)
+.PHONY: clean test
 
-# Clean rule
 clean:
-    rm -f $(OBJS) $(DEPS) $(TARGET)
-
-.PHONY: all clean
+	rm -f output *.o
