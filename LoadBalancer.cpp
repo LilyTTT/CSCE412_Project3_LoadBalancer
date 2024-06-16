@@ -24,6 +24,7 @@ void LoadBalancer::addRequest(const Request& request) {
 void LoadBalancer::balanceLoad(int numClockCycles) {
     // Least connections algorithm: find server with smallest queue size
     vector<thread> serverThreads;
+    vector<int> serverSize;
     int minQueueSize = INT_MAX;
     Server* selectedServer = nullptr;
     ofstream logFile("log.txt", ios::app); // Open file for logging
@@ -35,13 +36,23 @@ void LoadBalancer::balanceLoad(int numClockCycles) {
             requestQueue.push(newRequest);
         }
 
+        serverSize.clear();
+
         for (auto& server : servers) {
             int queueSize = server.getRequestQueueSize();
-            if (queueSize <= minQueueSize) {
-                minQueueSize = queueSize;
+            serverSize.push_back(queueSize);
+        }
+
+        minQueueSize = *(min_element(serverSize.begin(), serverSize.end()));
+
+        for (auto& server : servers) {
+            int queueSize = server.getRequestQueueSize();
+            if (queueSize == minQueueSize) {
                 selectedServer = &server;
+                break;
             }
         }
+        
         if (selectedServer) {
             selectedServer->addRequest(requestQueue.front());
             if (!selectedServer->isActive()){

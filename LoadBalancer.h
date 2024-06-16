@@ -4,6 +4,7 @@
 #include <queue>
 #include <thread>
 #include <fstream>
+#include <algorithm>
 #include "Server.h"
 #include "Request.h"
 #include "Counter.h"
