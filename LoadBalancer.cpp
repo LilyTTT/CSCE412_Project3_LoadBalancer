@@ -1,13 +1,26 @@
 #include "LoadBalancer.h"
 
+/**
+ * @brief Constructor for LoadBalancer class.
+ * @param serverVec Vector of Server objects.
+ * @param counter Reference to a Counter object for clock cycles.
+ */
 LoadBalancer::LoadBalancer(const vector<Server>& serverVec, Counter& counter): clockCounter(counter) {
-      servers = serverVec;
+    servers = serverVec;
 }
 
+/**
+ * @brief Adds a request to the request queue.
+ * @param request The Request object to add.
+ */
 void LoadBalancer::addRequest(const Request& request) {
     requestQueue.push(request);
 }
 
+/**
+ * @brief Balances load among servers using the least connections algorithm.
+ * @param numClockCycles Number of clock cycles to run the load balancing.
+ */
 void LoadBalancer::balanceLoad(int numClockCycles) {
     // Least connections algorithm: find server with smallest queue size
     vector<thread> serverThreads;
@@ -16,7 +29,7 @@ void LoadBalancer::balanceLoad(int numClockCycles) {
     ofstream logFile("log.txt", ios::app); // Open file for logging
 
     while (clockCounter.getCycles() < numClockCycles && !requestQueue.empty()) {
-        // Ramdomly add new requests
+        // Randomly add new requests
         if (rand() % 5 == 1){
             Request newRequest;
             requestQueue.push(newRequest);
@@ -43,7 +56,7 @@ void LoadBalancer::balanceLoad(int numClockCycles) {
         clockCounter.incrementCycle();
 
         if (clockCounter.getCycles() == numClockCycles){
-            cout << "leave" << endl;
+            cout << "Reached maximum clock cycles." << endl;
             break;
         }
     }
@@ -59,10 +72,18 @@ void LoadBalancer::balanceLoad(int numClockCycles) {
     } 
 }
 
+/**
+ * @brief Retrieves the current clock cycles count.
+ * @return Current clock cycles count.
+ */
 int LoadBalancer::getClockCycles() const {
     return clockCounter.getCycles();
 }
 
+/**
+ * @brief Retrieves the size of the request queue.
+ * @return Size of the request queue.
+ */
 int LoadBalancer::getRequestQueueSize() const {
     return requestQueue.size();
 }

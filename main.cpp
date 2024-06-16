@@ -2,14 +2,20 @@
 #include <vector>
 #include <thread>
 #include <chrono> 
+#include <fstream>
 #include "LoadBalancer.h"
 #include "Server.h"
 #include "Counter.h"
-#include <fstream>
 
+/**
+ * @brief Main function to demonstrate load balancing simulation.
+ * @details This function sets up servers, creates a load balancer instance,
+ *          generates requests, runs the load balancer, and logs results.
+ * @return Exit status.
+ */
 int main() {
     // Prep log file
-    ofstream logFile("log.txt");
+    std::ofstream logFile("log.txt");
     logFile.clear();
     logFile << "----------------------Start logging----------------------\n\n";
     logFile << "Tasks process time range from 1-5 clock cycles\n";
@@ -46,11 +52,7 @@ int main() {
     std::cin >> numClockCycles;
 
     // Run the load balancer for the specified time
-    // loadBalancer.balanceLoad(numClockCycles);
-    // std::thread lbThread(&LoadBalancer::balanceLoad, &loadBalancer, numClockCycles); // Example duration 100 (iterations or clock cycles)
     loadBalancer.balanceLoad(numClockCycles);
-    // Optionally join threads or manage server and load balancer lifecycle here
-    //lbThread.join();
 
     // Print the total clock cycles after running the load balancer
     std::ofstream appendFile("log.txt", std::ios::app);
